@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <hr>
+    <p>產生Token</p>
+    <form id="form" method="post">
+        選擇幣種：
+        <select name="tokenType">
+            <option value="eten">倚天劍</option>
+            <option value="toolong">屠龍刀</option>
+        </select>
+        <br> 使用者：<input type="text" name="tokenOwnerAddress">
+        <br> 數量：<input type="text" name="tokenAmount">
+        <br>
+        <input type="submit" value="生產">
+    </form>
+    <hr>
+    <p>檢查持有Token</p>
+    <form id="form_check_token" method="post" action="checkToken">
+        使用者：<input type="text" name="tokenOwnerAddress">
+        <br>
+        <input type="submit" value="檢視">
+    </form>
+</body>
+
+</html>
