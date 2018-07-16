@@ -31,9 +31,15 @@ app.post('/checkToken', function(req, res) {
     });
 });
 
+app.post('/transferToken', function(req, res) {
+    console.log("trans to =" + req.body.destinationAddress + " tokenID = " + req.body.tokenID);
+    //contractProxy.transferToken(req.body.tokenID, '', req.body.destinationAddress);
+
+    contractProxy.getLastTokenId(req.body.destinationAddress);
+});
+
 var server = app.listen(process.env.PORT || 8080, function() {
     var port = server.address().port;
 
     console.log("App now running on port: ", port);
-
 });
