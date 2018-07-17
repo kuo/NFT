@@ -49,54 +49,33 @@ contract NonfungibleToken is ERC721Token("TooLong", "Knife"), Ownable {
         }
     }
 
-    function getLastTokenId(address _addr) view public returns (uint[] _tokens) {
+    function getLastTokenId(address _addr) view public returns (uint _lastTokenId) {
+        uint l = ownedTokens[_addr].length;
+        uint lastToken = ownedTokens[_addr][l-1];
 
-        // if (ownedTokenCount[_addr] > 0) {
-        //     uint256 lastIndex = ownedTokens[_addr].length.sub(1);
-        //     uint256[] aryOfTokens = ownedTokens[_addr];
-        //     uint256 lastToken = aryOfTokens[lastIndex];
-        //     return lastToken;
-        // } else {
-        //     return 0;
-        // }
-        //uint[] aryOfTokens = ownedTokens[_addr];
-
-        return ownedTokens[_addr];
+        return lastToken;
     }
 
-    function transfer(address _to, uint256 _tokenId) public onlyOwnerOf(_tokenId) returns (uint256 _index, uint256 _lastIndex, uint256 _lastToken ) {
-        // ownedTokenCount[_to] = ownedTokenCount[_to].add(1);
-        // ownedTokenCount[msg.sender] = ownedTokenCount[msg.sender].sub(1);
-        // tokenOwner[_tokenId] = _to; //轉移對象
-        // emit Transfer(msg.sender, _to, _tokenId);
-        //clearApprovalAndTransfer(msg.sender, _to, _tokenId);
-
-        uint256 index = tokenIndex[_tokenId];
-        uint256 lastIndex = ownedTokens[msg.sender].length.sub(1);
-        uint256 lastToken = ownedTokens[msg.sender][lastIndex];
-
-        return (index, lastIndex, lastToken);
+    function transferToken(address _from, address _to, uint _tokenId) public {
+        if(ownedTokens[_from].length > 1) {
+            uint256 index = tokenIndex[_tokenId];
+            uint mLength = ownedTokens[_from].length;
+            uint mLastToken = ownedTokens[_from][mLength-1];
+        
+            ownedTokens[_from][index] = mLastToken;
+            tokenIndex[mLastToken] = index;
+        }
+        
+        //array length--
+        ownedTokens[_from].length--;
+        
+        //set token to receiver
+        tokenOwner[_tokenId] = _to;
+        ownedTokens[_to].push(_tokenId);
+        
+        //
+        emit Transfer(msg.sender, _to, _tokenId);
     }
-
-    function clearApprovalAndTransfer(address _from, address _to, uint256 _tokenId) private {
-        require(_to != address(0));
-        require(_to != _from);
-        require(tokenOwner[_tokenId] == _from);
-
-        //removeTokenFromSender(_from, _tokenId);
-
-        uint256 index = tokenIndex[_tokenId];
-        uint256 lastIndex = ownedTokens[_from].length.sub(1);
-        uint256 lastToken = ownedTokens[_from][lastIndex];
-    }
-
-    // function removeTokenFromSender(address _from, uint256 _tokenId) private {
-    //     require(tokenOwner[_tokenId] == _from);
-
-    //     uint256 index = tokenIndex[_tokenId];
-    //     uint256 lastIndex = ownedTokens[_from].length.sub(1);
-    //     uint256 lastToken = ownedTokens[_from][lastIndex];
-    // }
         
     
 

@@ -38,18 +38,6 @@ module.exports = {
             .then(function(receipt) {
                 console.log(receipt);
             });
-
-        // contractEtenData.methods.transferFrom('0x7EE785289153fe9720e2aC7CD641b6C6E75E44da', '0xcd1859780ea0e380312cFf51D34d8316983A6866', 2018071201)
-        //     .send({ from: '0x7EE785289153fe9720e2aC7CD641b6C6E75E44da', gas: 1500000 })
-        //     .then(function(receipt) {
-        //         console.log(receipt);
-        //     });
-
-        // contractEtenData.methods.transfer('0x4d5c5Fac5dD3812df35d82178F7619F61f051E20', 6054213604)
-        //     .send({ from: '0x7EE785289153fe9720e2aC7CD641b6C6E75E44da', gas: 1500000 })
-        //     .then(function(receipt) {
-        //         console.log(receipt);
-        //     });
     },
 
     getAllTokensByOwner: function(_owner, callback) {
@@ -123,17 +111,18 @@ module.exports = {
     },
 
     getLastTokenId: function(_owner) {
-        // contractTooLongData.methods.getLastTokenId(_owner).call(function(error, result) {
-        //     if (!error) {
-        //         console.log(result);
-        //     } else {
-        //         console.log(error);
-        //     }
-        // });
-
         contractTooLongData.methods.getLastTokenId(_owner).call({ from: _owner })
             .then(function(result) {
                 console.log(result)
             });
+    },
+
+    transferTokenTo: function(_to, _tokenId) {
+        contractTooLongData.methods.transferToken('0x7EE785289153fe9720e2aC7CD641b6C6E75E44da', _to, _tokenId)
+            .send({ from: '0x7EE785289153fe9720e2aC7CD641b6C6E75E44da', gas: 1500000 })
+            .then(function(result) {
+                console.log(result)
+            });
+
     }
 };

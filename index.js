@@ -35,7 +35,10 @@ app.post('/transferToken', function(req, res) {
     console.log("trans to =" + req.body.destinationAddress + " tokenID = " + req.body.tokenID);
     //contractProxy.transferToken(req.body.tokenID, '', req.body.destinationAddress);
 
-    contractProxy.getLastTokenId(req.body.destinationAddress);
+    //contractProxy.getLastTokenId(req.body.destinationAddress);
+    //contractProxy.getLastTokenIndex(req.body.destinationAddress);
+
+    contractProxy.transferTokenTo(req.body.destinationAddress, req.body.tokenID);
 });
 
 var server = app.listen(process.env.PORT || 8080, function() {
