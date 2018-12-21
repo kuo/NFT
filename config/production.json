@@ -1,0 +1,8 @@
+{
+    "production": {
+        "DBConfig": {
+            "Host": "mongodb://Admin:henry2270@ds147534.mlab.com:47534/ico-center",
+            "DBName": ""
+        }
+    }
+}
