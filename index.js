@@ -5,6 +5,8 @@ var app = express();
 var contractProxy = require('./ContractProxy');
 var render = require('./server-render');
 var routes = require('./router');
+var model = require('./models/ContractSchemaModel');
+var Dates = require('date-math');
 
 app.use(express.static('public'));
 app.use(bodyParser.raw());
@@ -25,4 +27,6 @@ var server = app.listen(process.env.PORT || 8080, function() {
     var port = server.address().port;
 
     console.log("App now running on port: ", port);
+
+    //model.saveTransRecord("", Date.now(), Dates.minute.shift(Date.now(), 2), "", "", "");
 });
