@@ -4,6 +4,7 @@ var util = require('util');
 var EthereumTx = require('ethereumjs-tx');
 var Web3 = require("web3");
 var jsonFile = "./DexonToken.json";
+//var jsonFile = "./NonfungibleToken.json";
 
 var web3 = new Web3();
 var parsed = JSON.parse(fs.readFileSync(jsonFile));
@@ -11,7 +12,8 @@ var abi = parsed.abi;
 var bytecode = parsed.bytecode;
 //web3.setProvider(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 //web3.setProvider(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
-web3.setProvider(new Web3.providers.HttpProvider("https://api-testnet.dexscan.org/v1/network/rpc"));
+//web3.setProvider(new Web3.providers.HttpProvider("https://api-testnet.dexscan.org/v1/network/rpc"));
+web3.setProvider(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/c5eb87da76344e86a1ef40e54e6e5043"));
 
 var privateKey = new Buffer(config.gashPrivateKey, 'hex');
 var address = config.gashWalletAddress;
@@ -39,7 +41,7 @@ module.exports = {
 
         //打包交易資料
         var tx = new EthereumTx({
-            chainId: 238,
+            chainId: 4,
             nonce: web3.utils.toHex(nonce),
             gasPrice: '0x3B9ACA00',
             gasLimit: estimateGas + 100000,
@@ -68,7 +70,7 @@ module.exports = {
 
         //打包交易資料
         var rawTx = {
-            chainId: 238,
+            chainId: 4,
             data: transactiondata,
             nonce: web3.utils.toHex(nonce),
             gasPrice: '0x3B9ACA00',
@@ -110,7 +112,7 @@ module.exports = {
 
         //打包交易資料
         var rawTx = {
-            chainId: 238,
+            chainId: 4,
             data: transactiondata,
             nonce: web3.utils.toHex(nonce),
             gasPrice: '0x3B9ACA00',

@@ -79,7 +79,7 @@ function transToken(contractAddress, destAddress, tokenId, currentCount) {
                 console.log('data = ' + util.inspect(transResult, false, null));
                 //部署資料塞入DB
                 contractModel.saveTransRecord(contractAddress, createDate, Date.now(), info.gasUsed, "transfer",
-                    "dexon").then(() => {
+                    "eth").then(() => {
                     currentCount++;
                     transToken(contractAddress, destAddress, currentCount, currentCount);
                 });
@@ -121,19 +121,19 @@ router.post('/transToken', function(req, res) {
         tokenId: joi.number().required()
     });
 
-    //transToken(req.body.contractAddress, req.body.walletAddress, 1, 1);
+    transToken(req.body.contractAddress, req.body.walletAddress, 1, 1);
 
-    if (joi.validate(req.body, validateSchema).error === null) {
-        contractProxy.transferToken(req.body.contractAddress, req.body.walletAddress, req.body.tokenId)
-            .then(transResult => {
-                var result = JSON.parse(JSON.stringify(transResult));
-                console.log('account = ' + util.inspect(result, false, null));
-                var resultView = `<h3>完成</h3>`;
-                res.send(resultView);
-            });
-    } else {
-        res.json({ "result": "data invalid" });
-    }
+    // if (joi.validate(req.body, validateSchema).error === null) {
+    //     contractProxy.transferToken(req.body.contractAddress, req.body.walletAddress, req.body.tokenId)
+    //         .then(transResult => {
+    //             var result = JSON.parse(JSON.stringify(transResult));
+    //             console.log('account = ' + util.inspect(result, false, null));
+    //             var resultView = `<h3>完成</h3>`;
+    //             res.send(resultView);
+    //         });
+    // } else {
+    //     res.json({ "result": "data invalid" });
+    // }
 });
 
 module.exports = router;
