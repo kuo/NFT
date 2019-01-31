@@ -1,6 +1,6 @@
 var config = {
-    gashPrivateKey: "620602a43537cbc95c471a856f4f967914dc66fd61a38499ba3d1b54bdaf6a0a",
-    gashWalletAddress: "0x09eec4769C895fE2aBae7FCd804ca1E643dCf234"
+    gashPrivateKey: "a05fbfed5e5068be6e37e33c2ce44325db327ccf6432291366508b817a80f071",
+    gashWalletAddress: "0x121E26fF94c1b25aB41a774e2BAEB680E8a345E1"
 }
 
 module.exports = config;

@@ -7,12 +7,13 @@ import "openzeppelin-solidity/contracts/utils/Address.sol";
 import "openzeppelin-solidity/contracts/introspection/ERC165.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
+import "../contracts/Console.sol";
 
 /**
  * @title ERC721 Non-Fungible Token Standard basic implementation
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
-contract DexonToken is ERC165, IERC721, Ownable {
+contract DexonToken is ERC165, IERC721, Ownable, Console {
 
   using SafeMath for uint256;
   using Address for address;
@@ -165,6 +166,9 @@ contract DexonToken is ERC165, IERC721, Ownable {
   )
     public
   {
+    log("transferFrom BEGIN, from = ", from);
+    log("transferFrom BEGIN, to = ", to);
+    log("transferFrom BEGIN, tokenId = ", tokenId);
     require(_isApprovedOrOwner(msg.sender, tokenId));
     require(to != address(0));
 
@@ -244,7 +248,7 @@ contract DexonToken is ERC165, IERC721, Ownable {
     address spender,
     uint256 tokenId
   )
-    internal
+    public
     view
     returns (bool)
   {
@@ -341,7 +345,7 @@ contract DexonToken is ERC165, IERC721, Ownable {
    * @param from address representing the previous owner of the given token ID
    * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
    */
-  function _removeTokenFrom(address from, uint256 tokenId) internal {
+  function _removeTokenFrom(address from, uint256 tokenId) public {
     require(ownerOf(tokenId) == from);
     _ownedTokensCount[from] = _ownedTokensCount[from].sub(1);
     _tokenOwner[tokenId] = address(0);
