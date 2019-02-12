@@ -5,7 +5,10 @@ var joi = require('joi');
 var contractProxy = require('../ContractProxy');
 var contractModel = require('../models/ContractSchemaModel');
 
-router.post('/deploy', function(req, res) {
+/** 
+ * 部署合約
+ */
+router.post('/deploy', async function(req, res) {
 
     const validateSchema = joi.object().keys({
         tokenName: joi.string().required(),
@@ -18,54 +21,103 @@ router.post('/deploy', function(req, res) {
     // });
 
     if (joi.validate(req.body, validateSchema).error === null) {
-        //1. 部署智能合約
+
         var createDate = Date.now();
-        contractProxy.createNonFungibleToken(req.body.tokenAmount, req.body.tokenName, req.body.tokenSymbol)
-            .then(receipt => {
-                var info = JSON.parse(JSON.stringify(receipt));
-                console.log("contract receipt = " + util.inspect(info, false, null));
+        try {
+            //1. 部署智能合約
+            var transReceipt = await contractProxy.createNonFungibleToken(req.body.tokenAmount, req.body.tokenName, req.body.tokenSymbol);
+            console.log(util.inspect(transReceipt, false, null));
 
-                //部署資料塞入DB
-                // contractModel.saveTransRecord(info.contractAddress, createDate, Date.now(), info.gasUsed, "deploy",
-                //     "dexon");
+            //deploy 資料入 DB
+            var info = JSON.parse(JSON.stringify(transReceipt));
+            //contractModel.saveTransRecord(info.contractAddress, createDate, Date.now(), info.gasUsed, "deploy", "dexon");
 
-                //2. mint token
-                contractProxy.mintToken(info.contractAddress, req.body.tokenAmount)
-                    .then(mintReceipt => {
-                        var tokenInfo = JSON.parse(JSON.stringify(mintReceipt));
-                        console.log("mint result = " + util.inspect(tokenInfo, false, null));
-                        var resView = `<h3>完成，合約位址：${info.contractAddress}</h3>`;
-                        res.send(resView);
-                    })
-                    .catch(err => {
-                        console.log("err = " + err);
-                        res.json({ "result": err });
-                    })
+            //2. Mint token
+            var mintReceipt = await contractProxy.mintToken(info.contractAddress, req.body.tokenAmount);
+            console.log("mint result = " + util.inspect(mintReceipt, false, null));
+            var resView = `<h2>完成，合約位址：${info.contractAddress}</h2>`;
+            res.send(resView);
 
-            })
-            .catch(err => {
-                console.log("err = " + err);
-                res.json({ "result": err });
-            })
+        } catch (err) {
+            res.json({ "result": "data invalid" });
+        }
+
     } else {
         console.log("request invalid");
         res.json({ "result": "data invalid" });
     }
 });
 
-function deploy(amount, name, symbol, currentCount) {
+/**
+ * 創帳號
+ */
+router.post('/newAccount', async function(req, res) {
+
+    var accountObj = await contractProxy.newAccount();
+    var accountInfo = JSON.parse(JSON.stringify(accountObj));
+    var resultView = `<h3>完成，帳號：${accountInfo.address}, 私鑰:${accountInfo.privateKey}</h3>`;
+    res.send(resultView);
+
+});
+
+/**
+ * 檢查持有者TOKEN
+ */
+router.post('/checkToken', async function(req, res) {
+    const validateSchema = joi.object().keys({
+        contractAddress: joi.string().required(),
+        walletAddress: joi.string().required()
+    });
+
+    if (joi.validate(req.body, validateSchema).error === null) {
+
+        var tokens = await contractProxy.getTokensByOwner(req.body.contractAddress, req.body.walletAddress);
+        var tokenIds = JSON.parse(JSON.stringify(tokens));
+        console.log('tokenIds = ' + util.inspect(tokenIds, false, null));
+        var resultView = `<h2>完成，TokenIds：${tokenIds}</h2>`;
+        res.send(resultView);
+
+    } else {
+        res.json({ "result": "data invalid" });
+    }
+});
+
+/** 
+ * 轉移TOKEN
+ */
+router.post('/transToken', async function(req, res) {
+    const validateSchema = joi.object().keys({
+        contractAddress: joi.string().required(),
+        walletAddress: joi.string().required(),
+        tokenId: joi.number().required()
+    });
+
+    //transToken(req.body.contractAddress, req.body.walletAddress, 1, 1);
+
+    if (joi.validate(req.body, validateSchema).error === null) {
+
+        var transResult = await contractProxy.transferToken(req.body.contractAddress, req.body.walletAddress, req.body.tokenId);
+        var result = JSON.parse(JSON.stringify(transResult));
+        console.log('result = ' + util.inspect(result, false, null));
+        var resultView = `<h2>完成</h2>`;
+        res.send(resultView);
+
+    } else {
+        res.json({ "result": "data invalid" });
+    }
+});
+
+async function deploy(amount, name, symbol, currentCount) {
     if (currentCount <= 30) {
         var createDate = Date.now();
-        contractProxy.createNonFungibleToken(amount, name, symbol).then(receipt => {
-            var info = JSON.parse(JSON.stringify(receipt));
-            console.log("contract receipt = " + util.inspect(info, false, null));
 
-            //部署資料塞入DB
-            contractModel.saveTransRecord(info.contractAddress, createDate, Date.now(), info.gasUsed, "deploy",
-                "dexon").then(() => {
-                currentCount++;
-                deploy(amount, name, symbol, currentCount);
-            });
+        var receipt = await contractProxy.createNonFungibleToken(amount, name, symbol);
+        var info = JSON.parse(JSON.stringify(receipt));
+        //部署資料塞入DB
+        contractModel.saveTransRecord(info.contractAddress, createDate, Date.now(), info.gasUsed, "deploy",
+            "dexon").then(() => {
+            currentCount++;
+            deploy(amount, name, symbol, currentCount);
         });
     }
 }
@@ -86,54 +138,5 @@ function transToken(contractAddress, destAddress, tokenId, currentCount) {
             });
     }
 }
-
-router.post('/newAccount', function(req, res) {
-    contractProxy.newAccount().then(accountObj => {
-        var accountInfo = JSON.parse(JSON.stringify(accountObj));
-        console.log('account = ' + util.inspect(accountInfo, false, null));
-        var resultView = `<h3>完成，帳號：${accountInfo.address}, 私鑰:${accountInfo.privateKey}</h3>`;
-        res.send(resultView);
-    })
-});
-
-router.post('/checkToken', function(req, res) {
-    const validateSchema = joi.object().keys({
-        contractAddress: joi.string().required(),
-        walletAddress: joi.string().required()
-    });
-
-    if (joi.validate(req.body, validateSchema).error === null) {
-        contractProxy.getTokensByOwner(req.body.contractAddress, req.body.walletAddress).then(tokens => {
-            var tokenIds = JSON.parse(JSON.stringify(tokens));
-            console.log('account = ' + util.inspect(tokenIds, false, null));
-            var resultView = `<h3>完成，TokenIds：${tokenIds}</h3>`;
-            res.send(resultView);
-        });
-    } else {
-        res.json({ "result": "data invalid" });
-    }
-});
-
-router.post('/transToken', function(req, res) {
-    const validateSchema = joi.object().keys({
-        contractAddress: joi.string().required(),
-        walletAddress: joi.string().required(),
-        tokenId: joi.number().required()
-    });
-
-    //transToken(req.body.contractAddress, req.body.walletAddress, 1, 1);
-
-    if (joi.validate(req.body, validateSchema).error === null) {
-        contractProxy.transferToken(req.body.contractAddress, req.body.walletAddress, req.body.tokenId)
-            .then(transResult => {
-                var result = JSON.parse(JSON.stringify(transResult));
-                console.log('account = ' + util.inspect(result, false, null));
-                var resultView = `<h3>完成</h3>`;
-                res.send(resultView);
-            });
-    } else {
-        res.json({ "result": "data invalid" });
-    }
-});
 
 module.exports = router;

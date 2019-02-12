@@ -4,6 +4,8 @@ var util = require('util');
 var EthereumTx = require('ethereumjs-tx');
 var Web3 = require("web3");
 var jsonFile = "./DexonToken.json";
+var baseTx = require('./SerializeTx').BaseSerializeTx;
+var transTx = require('./SerializeTx').TransSerializeTx;
 
 var web3 = new Web3();
 var parsed = JSON.parse(fs.readFileSync(jsonFile));
@@ -21,35 +23,31 @@ module.exports = {
     //若此function 是 view or pure, 使用call呼叫
     //反之使用send呼叫
     createNonFungibleToken: async function(_supply, _tokenName, _tokenSymbol) {
-        const myContract = new web3.eth.Contract(abi);
 
-        //打包合約建構子
-        var transactiondata = myContract.deploy({
-            data: bytecode,
-            arguments: [_supply, _tokenName, _tokenSymbol]
-        }).encodeABI();
+        try {
+            const myContract = new web3.eth.Contract(abi);
 
-        //估算手續費
-        var estimateGas = await web3.eth.estimateGas({ data: bytecode });
-        console.log("estimateGas = " + estimateGas);
+            //打包合約建構子
+            var transactiondata = myContract.deploy({
+                data: bytecode,
+                arguments: [_supply, _tokenName, _tokenSymbol]
+            }).encodeABI();
+            //估算手續費
+            var estimateGas = await web3.eth.estimateGas({ data: bytecode });
+            console.log("estimateGas: " + estimateGas);
+            //取得nonce
+            var nonce = await web3.eth.getTransactionCount(address);
+            console.log("nonce: " + nonce);
 
-        //取得nonce
-        var nonce = await web3.eth.getTransactionCount(address);
-        console.log("nonce = " + nonce);
+            var baseTxx = new baseTx(238, nonce, '0x3B9ACA00', estimateGas + 100000, transactiondata);
+            var serializedTx = baseTxx.getTx();
 
-        //打包交易資料
-        var tx = new EthereumTx({
-            chainId: 238,
-            nonce: web3.utils.toHex(nonce),
-            gasPrice: '0x3B9ACA00',
-            gasLimit: estimateGas + 100000,
-            data: transactiondata
-        });
-        tx.sign(privateKey);
-        var serializedTx = tx.serialize();
+            //送出交易
+            return await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+        } catch (err) {
+            return null;
+        }
 
-        //送出交易
-        return await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
     },
 
     mintToken: async function(contractAddress, amount) {
@@ -57,30 +55,18 @@ module.exports = {
 
         //合約function
         var transactiondata = contractData.methods.batchMint(amount).encodeABI();
-
         //估算手續費
         var estimateGas = await web3.eth.estimateGas({ data: bytecode });
-        console.log("estimateGas = " + estimateGas);
-
+        console.log("estimateGas: " + estimateGas);
         //取得nonce
         var nonce = await web3.eth.getTransactionCount(address);
-        console.log("nonce = " + nonce);
+        console.log("nonce: " + nonce);
 
-        //打包交易資料
-        var rawTx = {
-            chainId: 238,
-            data: transactiondata,
-            nonce: web3.utils.toHex(nonce),
-            gasPrice: '0x3B9ACA00',
-            gasLimit: estimateGas + 100000,
-            to: contractAddress
-        };
-        var tx = new EthereumTx(rawTx);
-        tx.sign(privateKey);
-        var serializedTx = tx.serialize();
+        var baseTxx = new transTx(238, transactiondata, nonce, '0x3B9ACA00', estimateGas + 100000, contractAddress);
+        var serializedTxx = baseTxx.getTx();
 
         //送出交易
-        return await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+        return await web3.eth.sendSignedTransaction('0x' + serializedTxx.toString('hex'));
     },
 
     newAccount: async function() {
@@ -97,68 +83,21 @@ module.exports = {
 
         var contractData = new web3.eth.Contract(abi, contractAddress);
 
-        var is = await contractData.methods._isApprovedOrOwner('0x121E26fF94c1b25aB41a774e2BAEB680E8a345E1', 1).call();
-        console.log("_isApprovedOrOwner = " + util.inspect(is, false, null));
-
         //合約function
         var transactiondata = contractData.methods.transferFrom('0x121E26fF94c1b25aB41a774e2BAEB680E8a345E1', desAddress, 1)
             .encodeABI();
-
         //估算手續費
         var estimateGas = await web3.eth.estimateGas({ data: bytecode });
-        console.log("estimateGas = " + estimateGas);
-
+        console.log("estimateGas: " + estimateGas);
         //取得nonce
         var nonce = await web3.eth.getTransactionCount(address);
-        console.log("nonce = " + nonce);
+        console.log("nonce: " + nonce);
 
         //打包交易資料
-        var rawTx = {
-            chainId: 238,
-            data: transactiondata,
-            nonce: web3.utils.toHex(nonce),
-            gasPrice: '0x3B9ACA00',
-            gasLimit: estimateGas + 100000,
-            to: contractAddress
-        };
-        var tx = new EthereumTx(rawTx);
-        tx.sign(privateKey);
-        var serializedTx = tx.serialize();
+        var baseTxx = new transTx(238, transactiondata, nonce, '0x3B9ACA00', estimateGas + 100000, contractAddress);
+        var serializedTxx = baseTxx.getTx();
 
         //送出交易
-        return await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
-
-        // var contractData = new web3.eth.Contract(abi, contractAddress);
-
-        // //合約function
-        // var transactiondata = contractData.methods.transferFrom(address, desAddress, 1).encodeABI();
-
-        // //估算手續費
-        // var estimateGas = await web3.eth.estimateGas({ data: bytecode });
-        // console.log("estimateGas = " + estimateGas);
-
-        // //取得nonce
-        // var nonce = await web3.eth.getTransactionCount(address);
-        // console.log("nonce = " + nonce);
-
-        // //取得token owner
-        // // var owner = await contractData.methods.ownerOf(tokenId).call();
-        // // console.log("owner of token = " + owner);
-
-        // //打包交易資料
-        // var rawTx = {
-        //     chainId: 238,
-        //     data: transactiondata,
-        //     nonce: web3.utils.toHex(nonce),
-        //     gasPrice: '0x3B9ACA00',
-        //     gasLimit: estimateGas + 3000000,
-        //     from: address
-        // };
-        // var tx = new EthereumTx(rawTx);
-        // tx.sign(privateKey);
-        // var serializedTx = tx.serialize();
-
-        // //送出交易
-        // return await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+        return await web3.eth.sendSignedTransaction('0x' + serializedTxx.toString('hex'));
     }
 };

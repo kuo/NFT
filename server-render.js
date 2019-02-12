@@ -5,7 +5,7 @@ module.exports = {
     deployContract: () => {
         var view = `<body>
         <hr>
-        <p>部署智能合約</p>
+        <h2>部署智能合約</h2>
         <form id="form_check_token" method="post" action="/public/formSubmitAction/deploy">
             Token名稱：<input type="text" name="tokenName">
             <br>

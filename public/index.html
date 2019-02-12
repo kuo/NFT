@@ -2,44 +2,81 @@
 <html>
 
 <body>
+    <style>
+        input[type="text"] {
+            margin: 5px;
+            padding: 5px 15px;
+            border: 2px black solid;
+            cursor: pointer;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            font-size: 20px;
+        }
+        
+        input[type="number"] {
+            margin: 5px;
+            padding: 5px 15px;
+            border: 2px black solid;
+            cursor: pointer;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            font-size: 20px;
+        }
+        
+        input[type="submit"] {
+            height: 30px;
+            margin: 10px;
+            background-color: coral;
+            font-size: 20px;
+        }
+    </style>
     <hr>
-    <p>部署智能合約</p>
+    <h1>部署 ERC721-Token智能合約</h1>
     <form id="form_deploy" method="post" action="/public/formSubmitAction/deploy">
-        Token名稱：<input type="text" name="tokenName">
-        <br> Token代號：
-        <input type="text" name="tokenSymbol">
-        <br> Token數量：
-        <input type="number" name="tokenAmount">
+        <input type="text" name="tokenName" placeholder="Token名稱">
+        <br>
+        <input type="text" name="tokenSymbol" placeholder="Token代號">
+        <br>
+        <input type="number" name="tokenAmount" placeholder="Token數量">
         <br>
         <br>
         <input type="submit" value="deploy">
     </form>
     <hr>
+    <!--
     <p>創建DEXON帳號</p>
     <form id="form_new_account" method="post" action="/public/formSubmitAction/newAccount">
         <input type="submit" value="create">
     </form>
     <hr>
-    <p>查詢TokenIds</p>
+    -->
+    <h1>查詢TokenIds</h1>
     <form id="form_check_token" method="post" action="/public/formSubmitAction/checkToken">
-        合約位址：
-        <input type="text" name="contractAddress">
-        <br> 使用者帳號：
-        <input type="text" name="walletAddress">
+
+        <input type="text" name="contractAddress" placeholder="合約位址">
         <br>
-        <input type="submit" value="checkToken">
+        <input type="text" name="walletAddress" placeholder="使用者帳號">
+        <br>
+        <input type="submit" value="check">
     </form>
     <hr>
-    <p>轉移TokenId</p>
+    <h1>轉移TokenId</h1>
     <form id="form_transfer_token" method="post" action="/public/formSubmitAction/transToken">
-        合約位址：
-        <input type="text" name="contractAddress">
-        <br> 轉移至帳號：
-        <input type="text" name="walletAddress">
-        <br> TokenId：
-        <input type="number" name="tokenId">
+
+        <input type="text" name="contractAddress" placeholder="合約位址">
         <br>
-        <input type="submit" value="transToken">
+        <input type="text" name="walletAddress" placeholder="轉移至帳號">
+        <br>
+        <input type="number" name="tokenId" placeholder="TokenId">
+        <br>
+        <input type="submit" value="transfer">
+    </form>
+    <hr>
+    <h1>DEXSCAN</h1>
+    <form id="form_scan_address" method="post" action="/public/formSubmitAction/scanAddress">
+        <input type="text" name="address" placeholder="位址">
+        <br>
+        <input type="submit" value="scan">
     </form>
 </body>
 
