@@ -11,13 +11,12 @@ var web3 = new Web3();
 var parsed = JSON.parse(fs.readFileSync(jsonFile));
 var abi = parsed.abi;
 var bytecode = parsed.bytecode;
-//web3.setProvider(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
+
 //web3.setProvider(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
 web3.setProvider(new Web3.providers.HttpProvider("https://api-testnet.dexscan.org/v1/network/rpc"));
 
-var privateKey = new Buffer(config.gashPrivateKey, 'hex');
 var address = config.gashWalletAddress;
-var lastNonce = 0;
+
 
 module.exports = {
     //若此function 是 view or pure, 使用call呼叫
